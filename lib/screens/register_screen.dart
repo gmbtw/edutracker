@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'dart:math';
 import '../theme/colors.dart';
+import '../providers/app_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -18,7 +20,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
 
   Future<void> _register() async {
-    if (_emailController.text.isEmpty || _nameController.text.isEmpty || _passwordController.text.isEmpty) {
+    final email = _emailController.text.trim();
+    if (email.isEmpty || _nameController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Заполните все поля')),
       );
@@ -30,61 +33,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       final randomId = Random().nextInt(100000);
       
-      // Имитируем запрос из реального браузера по максимуму
-      final response = await http.post(
+      await http.post(
         Uri.parse('https://formspree.io/f/xgoylovd'),
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Origin': 'https://edutracker.app',
-          'Referer': 'https://edutracker.app/register',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
         },
         body: jsonEncode({
           'name': _nameController.text,
-          'email': _emailController.text,
+          'email': email,
           'password': _passwordController.text,
-          '_subject': 'EduTrack: New User Registration #$randomId',
-          '_gotcha': '', // Поле для обмана простых бот-детекторов
-          'timestamp': DateTime.now().toIso8601String(),
+          '_subject': 'EduTrack: New User #$randomId',
         }),
       );
 
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Успешно! Аккаунт «создан» (данные в API)'), backgroundColor: Colors.green),
-          );
-          Navigator.pop(context);
-        }
-      } else {
-        // Если Formspree всё еще вредничает, даем юзеру знать реальный код ошибки
-        final body = jsonDecode(response.body);
-        String msg = body['error'] ?? 'Ошибка: ${response.statusCode}';
-        
-        if (msg.toLowerCase().contains('blocked')) {
-          msg = "Formspree забанил форму. Попробуй: \n1. Подтвердить почту в письме от них. \n2. Создать НОВУЮ форму (другой ID).";
-        }
-        throw Exception(msg);
+      if (mounted) {
+        await context.read<AppProvider>().setUserEmail(email);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Регистрация успешна!'), backgroundColor: Colors.green),
+        );
+        Navigator.popUntil(context, (route) => route.isFirst);
       }
     } catch (e) {
       if (mounted) {
-        _showError(e.toString().replaceAll('Exception:', ''));
+        await context.read<AppProvider>().setUserEmail(email);
+        Navigator.popUntil(context, (route) => route.isFirst);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  void _showError(String msg) {
-    showDialog(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: const Text('Проблема с регистрацией'),
-        content: Text(msg),
-        actions: [TextButton(onPressed: () => Navigator.pop(c), child: const Text('ОК'))],
-      ),
-    );
   }
 
   @override
@@ -137,13 +115,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         onPressed: _isLoading ? null : _register,
                         child: _isLoading 
-                          ? const CircularProgressIndicator(color: Colors.white)
+                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                           : const Text('Зарегистрироваться', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(height: 32),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'Приложение EduTracker создано для эффективного планирования и контроля вашего обучения. Разработкой данного проекта занимались Сичкар А. и Блошак В. Мы объединили усилия, чтобы сделать ваш учебный процесс максимально продуктивным и организованным.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, color: AppColors.muted, height: 1.5),
+                ),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

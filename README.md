@@ -1,16 +1,26 @@
-# edutracker
+# EduTracker
 
-A new Flutter project.
+**EduTracker** — это современное мобильное приложение для эффективного управления учебным процессом, разработанное в рамках учебного проекта.
 
-## Getting Started
+### Авторы
+Проект подготовили и реализовали: **Сичкар А.** и **Блошак В.**
 
-This project is a starting point for a Flutter application.
+### Описание
+Приложение создано для студентов и всех, кто стремится к организованному обучению. Оно объединяет в себе функционал трекера задач, интерактивного календаря и личного кабинета с синхронизацией данных. Пользователи могут планировать свои занятия, отслеживать детальную статистику успеваемости и настраивать интерфейс под себя, переключаясь между светлой и тёмной темами. EduTracker помогает структурировать знания и не упускать важные дедлайны.
 
-A few resources to get you started if this is your first Flutter project:
+## Функционал
+- **Регистрация через API**: Реальная отправка данных формы.
+- **Интерактивный календарь**: Планирование учебных дней.
+- **Статистика**: Наглядное отображение прогресса обучения.
+- **Синхронизация профиля**: Сохранение данных пользователя (Email).
+- **Темная тема**: Автоматическая и ручная смена режима оформления.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Стек технологий
+- Flutter / Dart
+- Provider (состояние)
+- SharedPreferences (локальное хранение)
+- HTTP (взаимодействие с API)
+- Table Calendar
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+*Разработано в 2026 году.*
