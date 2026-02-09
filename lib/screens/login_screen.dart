@@ -16,7 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  void _login() async {
+  void _login() {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Заполните все поля')),
@@ -25,12 +25,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
     
-    if (mounted) {
-      await context.read<AppProvider>().setUserEmail(_emailController.text);
-      setState(() => _isLoading = false);
-    }
+    // Имитация задержки сети
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        context.read<AppProvider>().loginUser(_emailController.text, _passwordController.text);
+        setState(() => _isLoading = false);
+      }
+    });
   }
 
   @override

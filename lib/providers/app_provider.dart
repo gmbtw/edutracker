@@ -1,43 +1,40 @@
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import git push -f origin maingit push -f origin main'package:flutter/material.dart';
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
 
 class AppProvider extends ChangeNotifier {
   String? _userEmail;
+  String? _passwordHash;
   ThemeMode _themeMode = ThemeMode.light;
 
   String? get userEmail => _userEmail;
+  String? get passwordHash => _passwordHash;
   ThemeMode get themeMode => _themeMode;
 
-  AppProvider() {
-    _loadSettings();
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    return sha256.convert(bytes).toString();
   }
 
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    _userEmail = prefs.getString('userEmail');
-    final isDark = prefs.getBool('isDark') ?? false;
-    _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
-    notifyListeners();
-  }
-
-  Future<void> setUserEmail(String email) async {
+  void loginUser(String email, String password) {
     _userEmail = email;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('userEmail', email);
+    _passwordHash = _hashPassword(password);
     notifyListeners();
   }
 
-  Future<void> toggleTheme() async {
+  void setUserEmail(String email) {
+    _userEmail = email;
+    notifyListeners();
+  }
+
+  void toggleTheme() {
     _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isDark', _themeMode == ThemeMode.dark);
     notifyListeners();
   }
 
-  Future<void> logout() async {
+  void logout() {
     _userEmail = null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('userEmail');
+    _passwordHash = null;
     notifyListeners();
   }
 }
